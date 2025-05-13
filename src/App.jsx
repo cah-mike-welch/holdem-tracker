@@ -26,14 +26,35 @@ export default function App() {
       <h1 className="text-2xl font-bold text-blue-700 mb-4">Texas Hold'em Hand Tracker</h1>
       <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
         <div>
-          <label className="block text-sm font-medium mb-1">Blind Level</label>
-          <input
-            type="text"
-            className="w-full p-2 border rounded-md"
-            placeholder="e.g. 100/200"
-            value={blindLevel}
-            onChange={(e) => setBlindLevel(e.target.value)}
-          />
+          <label className="block mb-2 font-semibold">Blind Level</label>
+            <select
+              value={blindLevel}
+              onChange={(e) => setBlindLevel(e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              {[
+                'Level 1: 100/200 (200)',
+                'Level 2: 200/300 (300)',
+                'Level 3: 200/400 (400)',
+                'Level 4: 300/500 (500)',
+                'Level 5: 300/600 (600)',
+                'Level 6: 400/800 (800)',
+                'Level 7: 500/1,000 (1,000)',
+                'Level 8: 600/1,200 (1,200)',
+                'Level 9: 800/1,600 (1,600)',
+                'Level 10: 1,000/2,000 (2,000)',
+                'Level 11: 1,200/2,400 (2,400)',
+                'Level 12: 1,500/3,000 (3,000)',
+                'Level 13: 2,000/4,000 (4,000)',
+                'Level 14: 2,500/5,000 (5,000)',
+                'Level 15: 3,000/6,000 (6,000)',
+              ].map((level, index) => (
+                <option key={index} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Position</label>
