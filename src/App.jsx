@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import HoleCardPicker from './HoleCardPicker';
+import { submitToGoogleSheet } from './utils/submitToGoogleSheets.js';
 
 export default function App() {
   const [blindLevel, setBlindLevel] = useState('');
@@ -18,6 +19,7 @@ export default function App() {
       cards,
       timestamp: new Date().toISOString()
     };
+    submitToGoogleSheet(hand);
     console.log('Saved hand:', hand);
   };
 
