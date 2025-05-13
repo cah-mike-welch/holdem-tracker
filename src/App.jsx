@@ -23,7 +23,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
-      <h1 className="text-2xl font-bold text-blue-700 mb-4">Texas Hold'em Hand Tracker</h1>
+      <h1 className="text-2xl font-bold text-blue-700 mb-4">Texas Hold'em Hand Tracker XXX</h1>
       <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
         <div>
           <label className="block mb-2 font-semibold">Blind Level</label>
