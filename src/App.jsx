@@ -1,31 +1,48 @@
+
+import { useState } from 'react';
 import HoleCardPicker from './HoleCardPicker';
 
 export default function App() {
-  const handleCardChange = (cards) => {
-    console.log('Selected cards:', cards);
-    // You could set state or save these to localStorage here
+  const [blindLevel, setBlindLevel] = useState('');
+  const [position, setPosition] = useState('');
+  const [cards, setCards] = useState([
+    { rank: '', suit: '' },
+    { rank: '', suit: '' }
+  ]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const hand = {
+      blindLevel,
+      position,
+      cards,
+      timestamp: new Date().toISOString()
+    };
+    console.log('Saved hand:', hand);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col p-4">
-      <h1 className="text-xl font-bold text-center text-blue-600 mb-4">
-        Texas Hold'em Hand Tracker
-      </h1>
-
-      <form className="flex flex-col items-center space-y-4 w-full">
-        <div className="w-64">
-          <label className="block text-sm font-medium mb-1 text-center">Blind Level</label>
+    <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
+      <h1 className="text-2xl font-bold text-blue-700 mb-4">Texas Hold'em Hand Tracker</h1>
+      <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
+        <div>
+          <label className="block text-sm font-medium mb-1">Blind Level</label>
           <input
             type="text"
             className="w-full p-2 border rounded-md"
-            placeholder="e.g. 50/100"
+            placeholder="e.g. 100/200"
+            value={blindLevel}
+            onChange={(e) => setBlindLevel(e.target.value)}
           />
         </div>
-
-        <div className="w-64">
-          <label className="block text-sm font-medium mb-1 text-center">Position</label>
-          <select className="w-full p-2 border rounded-md">
-            <option value="">--</option>
+        <div>
+          <label className="block text-sm font-medium mb-1">Position</label>
+          <select
+            className="w-full p-2 border rounded-md"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+          >
+            <option value="">Select position</option>
             <option>UTG</option>
             <option>UTG+1</option>
             <option>MP</option>
@@ -36,20 +53,17 @@ export default function App() {
             <option>BB</option>
           </select>
         </div>
-
-        <div className="w-64">
-          <label className="block text-sm font-medium mb-1 text-center">Hole Cards</label>
-          <HoleCardPicker onCardsChange={handleCardChange} />
+        <div>
+          <label className="block text-sm font-medium mb-1">Hole Cards</label>
+          <HoleCardPicker cards={cards} onCardsChange={setCards} />
         </div>
-
         <button
           type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700"
         >
-          Save Hand
+          Save
         </button>
       </form>
-
     </div>
   );
 }
