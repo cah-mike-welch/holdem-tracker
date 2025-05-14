@@ -172,7 +172,19 @@ export default function App() {
 
       {console.log('Showbetting='+showBetting)}
       {console.log('handId='+handId)}
-      {showBetting && handId && <BettingAction handId={handId} />}
+      {showBetting && handId && (
+  <BettingAction
+      handId={handId} blindLevel={blindLevel}
+      onComplete={() => {
+        // Reset hand input and show form again
+        setBlindLevel('');
+        setPosition('');
+        setCards([{ rank: '', suit: '' }, { rank: '', suit: '' }]);
+        setHandId(null);
+        setShowBetting(false);
+      }}
+    />
+  )}
     </div>
   );
 }
