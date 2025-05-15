@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { useEffect, useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
 
 const POSITIONS = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'Button', 'SB', 'BB'];
 const ROUNDS = ['preflop', 'flop', 'turn', 'river'];
 
-export default function BettingAction({ handId, blindLevel, onComplete }) {
+export default function BettingAction({ handId, blindLevel, onComplete, onRoundChange }) {
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [roundActions, setRoundActions] = useState({});
@@ -14,15 +14,18 @@ export default function BettingAction({ handId, blindLevel, onComplete }) {
   const [showRaiseInput, setShowRaiseInput] = useState(false);
   const [showBetInput, setShowBetInput] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [lastBetAmount, setLastBetAmount] = useState(null);
+  const [lastBetOrRaise, setLastBetOrRaise] = useState(null);
 
   const round = ROUNDS[currentRoundIndex];
   const position = POSITIONS[currentPositionIndex];
 
-  const getBigBlind = () => {
-    const match = blindLevel.match(/\/(\d+)/);
-    return match ? parseInt(match[1], 10) : 0;
-  };
+  // Notify parent of round change
+  useEffect(() => {
+    if (onRoundChange) {
+      onRoundChange(round);
+    }
+    console.log('Entering round:', round);
+  }, [currentRoundIndex, onRoundChange]);
 
   useEffect(() => {
     if (currentPositionIndex >= POSITIONS.length) {
@@ -30,49 +33,62 @@ export default function BettingAction({ handId, blindLevel, onComplete }) {
     }
   }, [currentPositionIndex]);
 
+  const advancePosition = () => {
+    let next = currentPositionIndex + 1;
+    while (next < POSITIONS.length && foldedPositions.has(POSITIONS[next])) {
+      next++;
+    }
+    setCurrentPositionIndex(next);
+  };
+
   const handleAction = (actionType) => {
     if (actionType === 'Raise') {
       setShowRaiseInput(true);
     } else if (actionType === 'Bet') {
       setShowBetInput(true);
     } else {
-      const amountToCall = lastBetAmount || (round === 'preflop' ? getBigBlind() : 0);
       const updated = {
         ...roundActions,
-        [position]: { action: actionType, amount: actionType === 'Call' ? amountToCall : undefined },
+        [position]: { action: actionType }
       };
+
       if (actionType === 'Fold') {
         setFoldedPositions(new Set([...foldedPositions, position]));
       }
+
+      if (actionType === 'Call') {
+        updated[position].amount = lastBetOrRaise;
+      }
+
       setRoundActions(updated);
-      setCurrentPositionIndex(i => i + 1);
+      advancePosition();
     }
   };
 
   const handleRaiseSubmit = () => {
-    const amount = parseInt(raiseAmount, 10);
+    const amount = parseInt(raiseAmount);
     const updated = {
       ...roundActions,
-      [position]: { action: 'Raise', amount },
+      [position]: { action: 'Raise', amount }
     };
     setRoundActions(updated);
-    setLastBetAmount(amount);
-    setShowRaiseInput(false);
+    setLastBetOrRaise(amount);
     setRaiseAmount('');
-    setCurrentPositionIndex(i => i + 1);
+    setShowRaiseInput(false);
+    advancePosition();
   };
 
   const handleBetSubmit = () => {
-    const amount = parseInt(betAmount, 10);
+    const amount = parseInt(betAmount);
     const updated = {
       ...roundActions,
-      [position]: { action: 'Bet', amount },
+      [position]: { action: 'Bet', amount }
     };
     setRoundActions(updated);
-    setLastBetAmount(amount);
-    setShowBetInput(false);
+    setLastBetOrRaise(amount);
     setBetAmount('');
-    setCurrentPositionIndex(i => i + 1);
+    setShowBetInput(false);
+    advancePosition();
   };
 
   const handleNextRound = async () => {
@@ -86,21 +102,20 @@ export default function BettingAction({ handId, blindLevel, onComplete }) {
     const { error } = await supabase.from('action').insert({
       hand_id: handId,
       round,
-      action: filteredActions,
+      action: filteredActions
     });
 
     if (error) {
-      console.error('Failed to save action:', error);
+      console.error('Error saving round:', error);
     }
 
     if (currentRoundIndex + 1 < ROUNDS.length) {
       setCurrentRoundIndex(currentRoundIndex + 1);
       setCurrentPositionIndex(0);
       setRoundActions({});
-      setLastBetAmount(null);
       setShowSummary(false);
     } else {
-      onComplete(); // signal betting is done
+      onComplete();
     }
   };
 
@@ -173,7 +188,7 @@ export default function BettingAction({ handId, blindLevel, onComplete }) {
   }
 
   if (foldedPositions.has(position)) {
-    setCurrentPositionIndex(i => i + 1);
+    advancePosition();
     return null;
   }
 
@@ -183,7 +198,7 @@ export default function BettingAction({ handId, blindLevel, onComplete }) {
       <div className="space-x-2">
         <button onClick={() => handleAction('Fold')} className="px-4 py-2 bg-gray-400 text-white rounded">Fold</button>
         <button onClick={() => handleAction('Call')} className="px-4 py-2 bg-yellow-500 text-white rounded">
-          Call {lastBetAmount || (round === 'preflop' ? getBigBlind() : '')}
+          {lastBetOrRaise ? `Call for ${lastBetOrRaise}` : 'Call'}
         </button>
         <button onClick={() => handleAction('Raise')} className="px-4 py-2 bg-red-500 text-white rounded">Raise</button>
         {round !== 'preflop' && (
