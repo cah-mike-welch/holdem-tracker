@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from '../supabaseClient';
 
 const POSITIONS = ['UTG', 'UTG+1', 'MP', 'HJ', 'CO', 'Button', 'SB', 'BB'];
 const ROUNDS = ['preflop', 'flop', 'turn', 'river'];
