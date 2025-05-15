@@ -1,5 +1,5 @@
 export default function StepNav({ currentStep }) {
-  const steps = ['session', 'start', 'preflop', 'flop', 'turn', 'river'];
+  const steps = ['session', 'deal', 'preflop', 'flop', 'turn', 'river'];
 
   return (
     <div className="w-full max-w-2xl flex justify-between mb-6 px-4">

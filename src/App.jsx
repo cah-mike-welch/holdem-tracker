@@ -38,7 +38,7 @@ export default function App() {
       console.error('Error saving session:', error);
     } else {
       setSessionId(data.session_id);
-      setStep('start');
+      setStep('deal');
     }
   };
 
@@ -184,7 +184,7 @@ export default function App() {
             setCards([{ rank: '', suit: '' }, { rank: '', suit: '' }]);
             setHandId(null);
             setShowBetting(false);
-            setStep('start');
+            setStep('deal');
           }}
         />
       )}
