@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HoleCardPicker from './components/HoleCardPicker';
 import BettingAction from './components/BettingAction';
 import StepNav from './components/StepNav';
@@ -22,8 +22,14 @@ export default function App() {
   const [handId, setHandId] = useState(null);
   const [showBetting, setShowBetting] = useState(false);
 
+  // 🔍 Debugging: Watch sessionId
+  useEffect(() => {
+    console.log('[Debug] sessionId changed:', sessionId);
+  }, [sessionId]);
+
   const handleSessionSubmit = async (e) => {
     e.preventDefault();
+    console.log('[Debug] Submitting session form:', sessionData);
     const { data, error } = await supabase
       .from('sessions')
       .insert([{
@@ -35,15 +41,17 @@ export default function App() {
       .single();
 
     if (error) {
-      console.error('Error saving session:', error);
+      console.error('[Debug] Error saving session:', error);
     } else {
       setSessionId(data.session_id);
       setStep('deal');
+      console.log('[Debug] Session saved successfully:', data);
     }
   };
 
   const handleHandSubmit = async (e) => {
     e.preventDefault();
+    console.log('[Debug] Submitting hand:', { blindLevel, position, cards });
     const { data, error } = await supabase
       .from('hands')
       .insert([{
@@ -59,17 +67,19 @@ export default function App() {
       .single();
 
     if (error) {
-      console.error('Error saving hand:', error);
+      console.error('[Debug] Error saving hand:', error);
     } else {
       setHandId(data.hand_id);
       setShowBetting(true);
       setStep('preflop');
+      console.log('[Debug] Hand saved successfully:', data);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
-      <StepNav currentStep={step} />
+      <StepNav currentStep={step} heroPosition={position} holeCards={cards} />
+
 
       <h1 className="text-2xl font-bold text-blue-700 mb-6">Texas Hold'em Tracker</h1>
 
