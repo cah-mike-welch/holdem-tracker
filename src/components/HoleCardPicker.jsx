@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 
-console.log('RADIX POPOVER:', Popover);
-
 const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
 const SUITS = [
   { symbol: '♠️', name: 'Spades', color: 'black' },
@@ -11,12 +9,12 @@ const SUITS = [
   { symbol: '♦️', name: 'Diamonds', color: 'red' },
 ];
 
-function CardSelect({ card, onChange }) {
+function CardSelect({ card, onChange, otherCard }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState('rank');
 
   const handleRankSelect = (rank) => {
-    onChange({ ...card, rank });
+    onChange({ ...card, rank, suit: '' }); // clear suit on rank change
     setStep('suit');
   };
 
@@ -24,6 +22,13 @@ function CardSelect({ card, onChange }) {
     onChange({ ...card, suit });
     setStep('rank');
     setOpen(false);
+  };
+
+  const isDisabled = (rank, suit) => {
+    return (
+      rank === otherCard.rank &&
+      suit === otherCard.suit
+    );
   };
 
   return (
@@ -49,8 +54,6 @@ function CardSelect({ card, onChange }) {
       </Popover.Trigger>
 
       <Popover.Portal>
-{/* <Popover.Overlay className="fixed inset-0 bg-black/50 z-40" /> */}
-
         <Popover.Content
           side="top"
           className="fixed z-50 top-1/2 left-1/2 w-72 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl p-5 shadow-xl border"
@@ -76,17 +79,21 @@ function CardSelect({ card, onChange }) {
             <>
               <div className="mb-2 text-sm font-bold text-center">Select Suit</div>
               <div className="grid grid-cols-4 gap-2">
-                {SUITS.map((s) => (
-                  <button
-                    key={s.name}
-                    onClick={() => handleSuitSelect(s.symbol)}
-                    className={`p-3 border rounded text-3xl hover:bg-blue-100 ${
-                      s.color === 'red' ? 'text-red-600' : 'text-black'
-                    }`}
-                  >
-                    {s.symbol}
-                  </button>
-                ))}
+                {SUITS.map((s) => {
+                  const disabled = isDisabled(card.rank, s.symbol);
+                  return (
+                    <button
+                      key={s.name}
+                      onClick={() => !disabled && handleSuitSelect(s.symbol)}
+                      className={`p-3 border rounded text-3xl hover:bg-blue-100 ${
+                        s.color === 'red' ? 'text-red-600' : 'text-black'
+                      } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      disabled={disabled}
+                    >
+                      {s.symbol}
+                    </button>
+                  );
+                })}
               </div>
             </>
           )}
@@ -105,8 +112,16 @@ export default function HoleCardPicker({ cards, onCardsChange }) {
 
   return (
     <div className="flex justify-center gap-4">
-      <CardSelect card={cards[0]} onChange={(card) => handleChange(0, card)} />
-      <CardSelect card={cards[1]} onChange={(card) => handleChange(1, card)} />
+      <CardSelect
+        card={cards[0]}
+        onChange={(card) => handleChange(0, card)}
+        otherCard={cards[1]}
+      />
+      <CardSelect
+        card={cards[1]}
+        onChange={(card) => handleChange(1, card)}
+        otherCard={cards[0]}
+      />
     </div>
   );
 }

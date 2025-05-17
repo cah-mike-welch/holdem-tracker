@@ -2,27 +2,19 @@ import { useState, useEffect } from 'react';
 import HoleCardPicker from './components/HoleCardPicker';
 import BettingAction from './components/BettingAction';
 import StepNav from './components/StepNav';
+import SessionForm from './components/SessionForm';
 import { supabase } from './utils/supabaseClient';
 
 export default function App() {
   const [step, setStep] = useState('session');
-
-  const [sessionData, setSessionData] = useState({
-    name: '',
-    location: '',
-    type: ''
-  });
+  const [sessionData, setSessionData] = useState({ name: '', location: '', type: '' });
   const [sessionId, setSessionId] = useState(null);
   const [blindLevel, setBlindLevel] = useState('');
   const [position, setPosition] = useState('');
-  const [cards, setCards] = useState([
-    { rank: '', suit: '' },
-    { rank: '', suit: '' }
-  ]);
+  const [cards, setCards] = useState([{ rank: '', suit: '' }, { rank: '', suit: '' }]);
   const [handId, setHandId] = useState(null);
   const [showBetting, setShowBetting] = useState(false);
 
-  // 🔍 Debugging: Watch sessionId
   useEffect(() => {
     console.log('[Debug] sessionId changed:', sessionId);
   }, [sessionId]);
@@ -80,51 +72,14 @@ export default function App() {
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
       <StepNav currentStep={step} heroPosition={position} holeCards={cards} />
 
-
       <h1 className="text-2xl font-bold text-blue-700 mb-6">Texas Hold'em Tracker</h1>
 
       {!sessionId && (
-        <form onSubmit={handleSessionSubmit} className="space-y-4 w-full max-w-sm">
-          <div>
-            <label className="block mb-1 font-semibold">Session Name</label>
-            <input
-              type="text"
-              value={sessionData.name}
-              onChange={(e) => setSessionData({ ...sessionData, name: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-semibold">Location</label>
-            <input
-              type="text"
-              value={sessionData.location}
-              onChange={(e) => setSessionData({ ...sessionData, location: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-semibold">Type</label>
-            <select
-              value={sessionData.type}
-              onChange={(e) => setSessionData({ ...sessionData, type: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-            >
-              <option value="">Select type</option>
-              <option value="0">Tournament</option>
-              <option value="1">Cash Game</option>
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700"
-          >
-            Start Session
-          </button>
-        </form>
+        <SessionForm
+          sessionData={sessionData}
+          setSessionData={setSessionData}
+          onSubmit={handleSessionSubmit}
+        />
       )}
 
       {sessionId && !showBetting && (
